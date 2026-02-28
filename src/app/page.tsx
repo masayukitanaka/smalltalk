@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import questionsData from '../docs/questions-ja.json';
 
 interface CardData {
@@ -91,6 +91,40 @@ export default function Home() {
     new Set(categories)
   );
 
+  // 表示中のカードIDを管理
+  const [visibleCardIds, setVisibleCardIds] = useState<Set<number>>(
+    new Set(conversationTopics.map(card => card.id))
+  );
+
+  // フェードアウト中のカードIDを管理
+  const [fadingOutCardIds, setFadingOutCardIds] = useState<Set<number>>(new Set());
+
+  // カテゴリー選択が変更されたときの処理
+  useEffect(() => {
+    const newVisibleIds = new Set(
+      conversationTopics
+        .filter(card => selectedCategories.has(card.category))
+        .map(card => card.id)
+    );
+
+    // 削除されるカードを特定
+    const cardsToRemove = Array.from(visibleCardIds).filter(id => !newVisibleIds.has(id));
+
+    if (cardsToRemove.length > 0) {
+      // フェードアウトアニメーションを開始
+      setFadingOutCardIds(new Set(cardsToRemove));
+
+      // アニメーション完了後にカードを削除
+      setTimeout(() => {
+        setVisibleCardIds(newVisibleIds);
+        setFadingOutCardIds(new Set());
+      }, 250); // アニメーション時間と同じ
+    } else {
+      // 追加のみの場合は即座に反映
+      setVisibleCardIds(newVisibleIds);
+    }
+  }, [selectedCategories]);
+
   // チェックボックスの状態を切り替える
   const toggleCategory = (category: string) => {
     setSelectedCategories(prev => {
@@ -113,11 +147,6 @@ export default function Home() {
   const deselectAll = () => {
     setSelectedCategories(new Set());
   };
-
-  // フィルタリングされたカード
-  const filteredCards = conversationTopics.filter(card =>
-    selectedCategories.has(card.category)
-  );
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 dark:from-gray-900 dark:to-black py-12 px-4">
@@ -181,9 +210,25 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-          {filteredCards.map((card) => (
-            <Card key={card.id} card={card} />
-          ))}
+          {conversationTopics
+            .filter(card => visibleCardIds.has(card.id) || fadingOutCardIds.has(card.id))
+            .map((card, index) => {
+              const isFadingOut = fadingOutCardIds.has(card.id);
+              const isFadingIn = visibleCardIds.has(card.id) && !isFadingOut;
+
+              return (
+                <div
+                  key={card.id}
+                  className={isFadingOut ? 'animate-fadeOut' : 'animate-fadeIn'}
+                  style={{
+                    animationDelay: isFadingIn ? `${index * 20}ms` : '0ms',
+                    animationFillMode: 'both'
+                  }}
+                >
+                  <Card card={card} />
+                </div>
+              );
+            })}
         </div>
       </div>
     </div>
