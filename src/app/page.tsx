@@ -83,6 +83,42 @@ function Card({ card }: { card: CardData }) {
 }
 
 export default function Home() {
+  // ユニークなカテゴリーを取得
+  const categories = Array.from(new Set(conversationTopics.map(card => card.category)));
+
+  // 各カテゴリーの表示状態を管理（初期値は全て表示）
+  const [selectedCategories, setSelectedCategories] = useState<Set<string>>(
+    new Set(categories)
+  );
+
+  // チェックボックスの状態を切り替える
+  const toggleCategory = (category: string) => {
+    setSelectedCategories(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(category)) {
+        newSet.delete(category);
+      } else {
+        newSet.add(category);
+      }
+      return newSet;
+    });
+  };
+
+  // すべて選択
+  const selectAll = () => {
+    setSelectedCategories(new Set(categories));
+  };
+
+  // すべて解除
+  const deselectAll = () => {
+    setSelectedCategories(new Set());
+  };
+
+  // フィルタリングされたカード
+  const filteredCards = conversationTopics.filter(card =>
+    selectedCategories.has(card.category)
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 dark:from-gray-900 dark:to-black py-12 px-4">
       <div className="max-w-6xl mx-auto">
@@ -99,12 +135,53 @@ export default function Home() {
             要望や質問などはこちら
           </a>
         </div>
-        <p className="text-center text-gray-600 dark:text-gray-300 mb-12">
+        <p className="text-center text-gray-600 dark:text-gray-300 mb-8">
           カードをタップして話題を見つけよう
         </p>
 
+        {/* カテゴリーフィルター */}
+        <div className="mb-8 bg-white dark:bg-gray-800 rounded-lg p-4 shadow-md">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+              カテゴリーを選択
+            </h2>
+            <div className="flex gap-2">
+              <button
+                onClick={selectAll}
+                className="px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-md transition-colors"
+              >
+                すべて選択
+              </button>
+              <button
+                onClick={deselectAll}
+                className="px-3 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+              >
+                すべて解除
+              </button>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            {categories.map(category => (
+              <label
+                key={category}
+                className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 px-3 py-2 rounded-md transition-colors"
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedCategories.has(category)}
+                  onChange={() => toggleCategory(category)}
+                  className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                />
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  {category}
+                </span>
+              </label>
+            ))}
+          </div>
+        </div>
+
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-          {conversationTopics.map((card) => (
+          {filteredCards.map((card) => (
             <Card key={card.id} card={card} />
           ))}
         </div>
