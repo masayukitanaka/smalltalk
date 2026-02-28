@@ -154,16 +154,6 @@ export default function Home() {
         <h1 className="text-4xl font-bold text-center mb-2 text-gray-800 dark:text-white">
           雑談ネタカード
         </h1>
-        <div className="text-center mb-4">
-          <a
-            href="https://forms.gle/1oYUy1vV6k4AsbcK9"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors underline"
-          >
-            要望や質問などはこちら
-          </a>
-        </div>
         <p className="text-center text-gray-600 dark:text-gray-300 mb-8">
           カードをタップして話題を見つけよう
         </p>
@@ -229,6 +219,16 @@ export default function Home() {
                 </div>
               );
             })}
+        </div>
+        <div className="text-center mb-4">
+          <a
+            href="https://forms.gle/1oYUy1vV6k4AsbcK9"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors underline"
+          >
+            要望や質問などはこちら
+          </a>
         </div>
       </div>
     </div>
